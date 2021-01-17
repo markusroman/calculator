@@ -5,22 +5,17 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
-import { ButtonType, button_data } from './constants';
+import { ButtonType, filled_button_data } from './constants';
 import { calculate } from './operations';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
+      marginTop: 100,
       flexGrow: 1,
     },
-    button: {
-      height: '4rem',
-      width: '4rem',
-      alignSelf: 'center',
-      justifySelf: 'center',
-    },
     input: {
-      width: '50%',
+      width: '100%',
       alignSelf: 'center',
       justifySelf: 'center',
     },
@@ -38,7 +33,7 @@ const App = () => {
   const classes = useStyles();
 
   const handleClick = ({ name, type, operation = '' }: ButtonType) => {
-    console.log('Clicked ', name);
+    console.log(operand, name, input_value);
     if (type === 'number') {
       if (show_result) {
         setInputValue(name);
@@ -47,49 +42,53 @@ const App = () => {
         setInputValue((input_value) => input_value + name);
       }
     } else {
-      if (operation === 'inverse' || 'square' || 'squareroot' || 'opposite') {
+      if (
+        ['inverse', 'square', 'squareroot', 'opposite'].find(
+          (element) => element === operation
+        )
+      ) {
+        if (input_value === '') return null;
         const result = calculate(Number(input_value), null, operation);
-        if (!result) {
-          return null;
-        }
+        if (!result) return null;
         setOperand(result);
         setInputValue(`${result}`);
         setCurrentOperation(null);
         setShowResult(true);
       } else if (!operand) {
         setOperand(Number(input_value));
-        setInputValue('');
-        setCurrentOperation((operation as unknown) as string);
-        setShowResult(false);
-      } else if (operation !== 'calculate') {
-        const result = calculate(operand, Number(input_value), operation);
+        setCurrentOperation(operation);
+        setShowResult(true);
+      } else if (operation !== 'calculate' && current_operation) {
+        const result = calculate(
+          operand,
+          Number(input_value),
+          current_operation
+        );
+        if (!result) return null;
         setOperand(result);
-        setInputValue('');
-        setCurrentOperation((operation as unknown) as string);
-        setShowResult(false);
+        setInputValue(`${result}`);
+        setCurrentOperation(operation);
+        setShowResult(true);
       } else {
         const result = calculate(
           operand,
           Number(input_value),
-          current_operation || ''
+          current_operation ? current_operation : ''
         );
-        if (!result) {
-          return null;
-        }
+        if (!result) return null;
         setOperand(null);
         setInputValue(`${result}`);
-        setCurrentOperation(null);
         setShowResult(true);
       }
     }
   };
 
   return (
-    <div className='App'>
+    <div className={classes.root}>
       <CssBaseline />
-
       <Grid container justify='center' alignItems='center' spacing={1}>
-        <Grid item xs={12}>
+        <Grid item xs={4}></Grid>
+        <Grid item xs={4}>
           <Input
             id='standard-number'
             type='text'
@@ -101,17 +100,22 @@ const App = () => {
             className={classes.input}
           />
         </Grid>
-        {button_data.map((data) => (
-          <Grid item xs={3} key={data.name} className={classes.button}>
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={() => handleClick(data)}
-            >
-              {data.name}
-            </Button>
-          </Grid>
-        ))}
+        <Grid item xs={4}></Grid>
+        {filled_button_data.map((data, index) =>
+          data ? (
+            <Grid item xs={1} key={index}>
+              <Button
+                variant='contained'
+                color='primary'
+                onClick={() => handleClick(data)}
+              >
+                {data.name}
+              </Button>
+            </Grid>
+          ) : (
+            <Grid item xs={1} key={index}></Grid>
+          )
+        )}
       </Grid>
     </div>
   );
