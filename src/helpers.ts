@@ -1,7 +1,11 @@
+export const changeInputToNumber = (input: string) => {
+  return Number(input);
+};
+
 export const calculate = (
   operand: number,
   operand_2: number | null,
-  operation: string
+  operation?: string
 ) => {
   let result: number | null = null;
   switch (operation) {
